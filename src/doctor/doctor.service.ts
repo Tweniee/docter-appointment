@@ -1,26 +1,25 @@
 import { Injectable } from '@nestjs/common';
 import { CreateDoctorDto } from './dto/create-doctor.dto';
 import { UpdateDoctorDto } from './dto/update-doctor.dto';
+import { InjectModel } from '@nestjs/sequelize';
+import { Doctor } from './model/doctor.model';
 
 @Injectable()
 export class DoctorService {
+  constructor(@InjectModel(Doctor) private doctorModel: typeof Doctor) {}
   create(createDoctorDto: CreateDoctorDto) {
-    return 'This action adds a new doctor';
+    //with no primary field we cannot multiple doctors can create profile in doctor table
+    return this.doctorModel.create({ createDoctorDto });
   }
 
-  findAll() {
-    return `This action returns all doctor`;
-  }
-
-  findOne(id: number) {
-    return `This action returns a #${id} doctor`;
-  }
-
-  update(id: number, updateDoctorDto: UpdateDoctorDto) {
-    return `This action updates a #${id} doctor`;
-  }
-
-  remove(id: number) {
-    return `This action removes a #${id} doctor`;
-  }
+  async findAll(
+    filters = {},
+    options: { limit?: number; offset?: number } = {},
+  ): Promise<Doctor[]> {
+    return this.doctorModel.findAll({
+      where: filters,
+      limit: options.limit,
+      offset: options.offset,
+    });
+  } 
 }

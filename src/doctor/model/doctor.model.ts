@@ -24,3 +24,4 @@ export class Doctor extends Model {
   @HasMany(() => Appointment)
   appointments: Appointment[];
 }
+

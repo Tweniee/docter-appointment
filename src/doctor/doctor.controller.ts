@@ -1,7 +1,6 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
+import { Controller, Get, Post, Body, Query } from '@nestjs/common';
 import { DoctorService } from './doctor.service';
 import { CreateDoctorDto } from './dto/create-doctor.dto';
-import { UpdateDoctorDto } from './dto/update-doctor.dto';
 
 @Controller('doctor')
 export class DoctorController {
@@ -13,22 +12,23 @@ export class DoctorController {
   }
 
   @Get()
-  findAll() {
-    return this.doctorService.findAll();
-  }
+  findAll(
+    @Query('specialization') specialization?: string,
+    @Query('page') page: string = '1',
+    @Query('limit') limit: string = '10',
+    @Query('id') id?: string,
+  ) {
+    const pageNumber = parseInt(page, 10);
+    const limitNumber = parseInt(limit, 10);
+    const offset = (pageNumber - 1) * limitNumber;
 
-  @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.doctorService.findOne(+id);
-  }
+    const filters: any = {};
+    if (specialization) filters.specialization = specialization;
+    if (id) filters.id = id;
 
-  @Patch(':id')
-  update(@Param('id') id: string, @Body() updateDoctorDto: UpdateDoctorDto) {
-    return this.doctorService.update(+id, updateDoctorDto);
-  }
-
-  @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.doctorService.remove(+id);
+    return this.doctorService.findAll(filters, {
+      limit: limitNumber,
+      offset,
+    });
   }
 }
