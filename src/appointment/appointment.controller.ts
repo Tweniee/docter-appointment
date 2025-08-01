@@ -9,6 +9,7 @@ import {
 } from '@nestjs/common';
 import { AppointmentService } from './appointment.service';
 import { CreateAppointmentDto } from './dto/create-appointment.dto';
+import { Op } from 'sequelize';
 
 @Controller('appointment')
 export class AppointmentController {
@@ -30,16 +31,26 @@ export class AppointmentController {
     const pageNumber = parseInt(page, 10);
     const limitNumber = parseInt(limit, 10);
     const offset = (pageNumber - 1) * limitNumber;
-    const filters = { doctorId, date, patientName };
+    const filters: any = {};
+    if (date) {
+      filters.startTime = date;
+    }
+    if (doctorId) {
+      filters.doctorId = doctorId;
+    }
+
+    if (patientName) {
+      filters.patientName = patientName;
+    }
     return this.appointmentService.findAll(filters, {
       limit: limitNumber,
       offset,
     });
   }
 
-  @Get(':docId/:date')
-  getSlots(@Param('docId') docId: string, @Param('date') date: string) {
-    return this.appointmentService.fetchAllAvailableSlots(docId, date);
+  @Get('slots/:docId/:startTime')
+  getSlots(@Param('docId') id: string, @Param('startTime') startTime: string) {
+    return this.appointmentService.fetchAllAvailableSlots(id, startTime);
   }
 
   @Delete(':id')
